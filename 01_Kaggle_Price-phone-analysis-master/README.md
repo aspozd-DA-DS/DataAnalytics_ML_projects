@@ -24,7 +24,7 @@ Python, pandas, numpy, seaborn, matplotlib, scikit-learn
 2. Перейти в папку проекта:
    cd DataAnalytics_projects/01_Kaggle_Price-phone-analysis-master
 3. Запустить ноутбук:  
-   `jupyter notebook 01_Kaggle_Price-phone-analysis.ipynb`
+   `jupyter notebook Price-phone-analysis-master.ipynb`
 
 ## 🏷 Topics
 `Data Analysis` `EDA` `Visualization` `Kaggle` `Python`
