@@ -20,9 +20,11 @@ Python, pandas, numpy, seaborn, matplotlib, scikit-learn
 
 ## 🚀 Как запустить
 1. Склонировать репозиторий:  
-   `git clone https://github.com/aspozd-DA-DS/smartphone-analysis`
-2. Запустить ноутбук:  
-   `jupyter notebook notebooks/eda.ipynb`
+   `git clone https://github.com/aspozd-DA-DS/DataAnalytics_projects.git`
+2. Перейти в папку проекта:
+   cd DataAnalytics_projects/01_Kaggle_Price-phone-analysis-master
+3. Запустить ноутбук:  
+   `jupyter notebook 01_Kaggle_Price-phone-analysis.ipynb`
 
 ## 🏷 Topics
 `Data Analysis` `EDA` `Visualization` `Kaggle` `Python`
