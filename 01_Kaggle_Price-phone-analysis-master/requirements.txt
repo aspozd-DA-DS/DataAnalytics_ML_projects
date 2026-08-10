@@ -1,0 +1,16 @@
+pandas
+numpy
+
+matplotlib
+seaborn
+
+requests
+charset-normalizer
+
+kaggle
+yfinance
+
+phik
+scipy
+
+scikit-learn
