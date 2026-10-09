@@ -1,3 +1,13 @@
+<a id="top"></a>
+
+<p align="right">
+  <a href="#ru">🇷🇺 RU</a> | <a href="#en">🇬🇧 EN</a>
+</p>
+
+---
+
+<a id="ru"></a>
+
 # Forecast Direction: прогнозирование направления движения цены
 
 ## 📌 Описание проекта
@@ -173,10 +183,10 @@
 `04_Forecast_Direction_OHLCV/`
 
 ```text
+├── `Dataset_Forecast_Direction_OHLCV/`     — исходный CSV-файл 
 ├── `Forecast_Direction_OHLCV.ipynb`        — основной ноутбук с полным анализом  
 ├── `Forecast_Direction_OHLCV.pdf`          — экспорт в PDF  
-├── `Dataset_Forecast_Direction_OHLCV/`     — исходный CSV-файл  
-├──  `requirements.txt`                     — зависимости проекта
+├── `requirements.txt`                      — зависимости проекта
 └── `README.md`                             — эта документация
 ```
 ---
@@ -185,16 +195,227 @@
 1. Склонировать репозиторий:
    ```bash
    git clone https://github.com/aspozd-DA-DS/DataAnalytics_projects.git
-
+   ```
 2. Перейти в папку проекта:
    ```bash
    cd DataAnalytics_projects/04_Forecast_Direction_OHLCV
-
+   ```
 3. Запустить ноутбук:
    ```bash
    jupyter notebook Forecast_Direction_OHLCV.ipynb
+   ```
 
 ---
    
 ## 🏷 Topics
 `Data Analysis` `EDA` `Visualization` `Time Series` `Financial Data` `Python` `Binary Classification` `Machine Learning` `XGBoost LightGBM` `SHAP Feature Engineering` `Trading Quantitative Finance`
+
+<p align="right"><a href="#top">⬆ наверх</a></p>
+
+---
+
+<a id="en"></a>
+
+# Forecast Direction: forecasting price movement direction
+
+## 📌 Project description
+
+This project is a full analysis cycle and a binary classification model for forecasting the direction of a financial instrument's price movement on the next trading day. It covers time series EDA, feature engineering, stationarity and seasonality checks, model training with TimeSeriesSplit, probability calibration, and practical recommendations for traders.
+
+**Key project goals:**
+- Develop an interpretable binary classification model of price direction (up/down).
+- Build a robust pipeline that avoids look-ahead bias.
+- Identify the key market factors that influence the direction of movement.
+- Evaluate the model's real predictive power on a held-out test set.
+
+**Practical value:**
+- Generating trading signals for algorithmic systems.
+- Supporting investment decisions and risk management.
+- Understanding the factors that drive short-term market dynamics.
+
+---
+
+## 🎯 Research goals
+1. Build a binary classification model that predicts the price direction for the next day.
+2. Choose and justify quality metrics in light of business meaning (false signals vs missed moves).
+3. Check the temporal structure: date monotonicity, gaps (weekends/holidays).
+4. Study the properties of the series: trends, seasonality, volatility, autocorrelation.
+5. Create informative features based on lags, rolling windows, and technical indicators.
+6. Compare models (Logistic Regression, Decision Tree, Random Forest, XGBoost, LightGBM) with TimeSeriesSplit.
+7. Analyze feature importance and interpret the model's logic via SHAP.
+8. Formulate practical recommendations for traders.
+
+---
+
+## 🔧 Technical stack
+- **Programming language:** Python  
+- **Data analysis:** Pandas, NumPy  
+- **Visualization:** Matplotlib, Seaborn  
+- **Statistics:** SciPy, statsmodels, `phik`  
+- **Machine learning:** Scikit-learn, XGBoost, LightGBM  
+- **Model interpretation:** SHAP  
+- **Probability calibration:** Platt scaling (sigmoid)  
+- **Validation:** TimeSeriesSplit, Walk-Forward Validation
+
+---
+
+## 📊 Data
+The project uses a synthetic OHLCV (Open, High, Low, Close, Volume) dataset covering 2014 to 2024.
+
+**Data structure:**
+- `date` — trading date (index)
+- `open` — opening price
+- `high` — highest price of the day
+- `low` — lowest price of the day
+- `close` — closing price
+- `vol` — trading volume
+- `target` — price direction on the next day (1 — up, 0 — down)
+
+**Data notes:**
+- 2507 trading days
+- Gaps in calendar dates — weekends and holidays (normal for exchange data)
+- Balanced classes: 51.3% up, 48.7% down
+- The target is not a simple `close[t+1] > close[t]` (10% mismatches)
+
+---
+
+## 📈 Key project stages
+
+### Step 1: Data loading and preprocessing
+- Loading the Excel file, setting the date as the index
+- Checking date monotonicity, gaps, and duplicates
+- Analyzing the target: class balance, logical check
+- 254 mismatches with the simple close-to-close rule identified
+
+### Step 2: Feature engineering
+- **Basic features:** candle body, shadows, intraday volatility
+- **Returns and lags:** log return, return lags, price and volume lags
+- **Rolling statistics:** SMA 5/10/20/50, volatility (rolling_std), relative volume
+- **Technical indicators:** RSI (14), ROC (5)
+- **Calendar features:** day of week, month
+- **Final set:** 18 features (non-stationary price series excluded)
+
+### Step 3: Time series EDA
+- Distributions: returns have heavy tails and are not normal
+- Time plots: long-term upward trend with a correction after 2022
+- Decomposition: pronounced annual seasonality, volatility clusters
+- Autocorrelation: no linear autocorrelation in returns
+- Correlation analysis: 83 feature pairs with correlation >0.7
+
+### Step 4: Preparing for modeling
+- Selecting 18 stationary features, excluding raw prices
+- Dropping NaN rows (first ~50 rows)
+- Time-based split: Train (2014–2021), Valid (2022–2023), Test (2024)
+- Scaling: RobustScaler (fit on train)
+- Separate pipelines for tree-based models and logistic regression
+
+### Step 5: Modeling
+- **Baselines:** most_frequent (F1=0.324), stratified (F1=0.501), naive (F1=0.473)
+- **Logistic Regression:** C=0.05, VALID F1=0.501
+- **Decision Tree:** max_depth=3, VALID F1=0.605 — best model
+- **Random Forest:** VALID F1=0.488
+- **XGBoost:** VALID F1=0.525
+- **LightGBM:** VALID F1=0.501
+- **Calibration:** Platt scaling improved the Brier score by 7.4%
+- **Optimal threshold:** 0.20 (F1=0.646, Recall=0.987)
+
+### Step 6: Test set evaluation
+- **Metrics (threshold 0.20):** F1=0.643, Recall=1.000, Precision=0.474, ROC-AUC=0.529
+- **Confusion matrix:** TP=54, FP=60, TN=0, FN=0
+- **Stability:** average monthly F1 0.636, range 0.250
+- **Strategy profitability:** 0.218 (DecisionTree), 0.193 (XGBoost calibrated)
+
+### Step 7: Model interpretation
+- **Feature importance (DecisionTree):** only 6 of 18 features
+  - return_lag1 (0.194), roc_5 (0.178), dist_to_low_5 (0.173), dist_to_high_5 (0.155), overnight_return (0.154), vol_lag1 (0.146)
+- **SHAP analysis:**
+  - dist_to_high_5 — strongest contribution to buy signals
+  - dist_to_low_5 — main quality filter (delta TP-FP = +0.0132)
+  - return_lag1 — second most important quality filter
+- **Tree logic:** momentum + local levels + gaps + volume
+
+---
+
+## 📊 Key findings
+
+### Key features linked to the direction of movement
+- `return_lag1` — yesterday's return (main driver)
+- `roc_5` — 5-day momentum
+- `dist_to_low_5` / `dist_to_high_5` — position of the price relative to local extremes
+- `overnight_return` — opening gap
+- `vol_lag1` — lagged volume
+
+### Model logic (DecisionTree)
+The model implements a simple but interpretable trading strategy:
+- If the price is close to a local minimum → a rise is likely
+- If the recent return is positive → a rise is likely
+- If the 5-day rise is moderate → a rise is likely
+- If the opening gap is not negative → a rise is likely
+- If yesterday's volume was normal → a rise is likely
+
+### Quality signals vs false signals
+- **True signals (TP):** price in the right zone relative to the minimum, positive return, gap not against the move
+- **False signals (FP):** price far from the minimum, negative previous-day return, weak momentum
+
+### Feature stability
+- The top 6 features are stable across train/valid/test
+- This suggests the model has learned stable market patterns
+
+### Model selection recommendations
+
+| Scenario | Recommended model | Threshold | Expected F1 |
+|----------|------------------|-----------|-------------|
+| Maximum coverage of up-moves | DecisionTree | 0.20 | 0.646 |
+| Balanced approach | XGBoost (calibrated) | 0.50 | 0.525 |
+| Conservative (few false signals) | XGBoost (calibrated) | 0.55–0.65 | 0.46–0.58 |
+
+### Limitations of the study
+- **Short test period:** 114 observations → high variance of metrics
+- **Low precision:** 47% of signals are correct → more than half are false
+- **Weak probability quality:** ROC-AUC = 0.529
+- **On the test set the model predicts only "up":** TN = 0
+- **Transaction costs not accounted for**
+
+### Ideas for development
+- Improve feature engineering (interaction features, longer lags)
+- Use Optuna for hyperparameter optimization
+- Model stacking (DecisionTree + XGBoost)
+- Expanding window validation to increase the amount of data
+- Add signal filtering based on SHAP
+- Implement online retraining on new data
+
+---
+
+## 📁 Repository structure
+
+`04_Forecast_Direction_OHLCV/`
+
+```text
+├── `Dataset_Forecast_Direction_OHLCV/`     — source CSV file  
+├── `Forecast_Direction_OHLCV.ipynb`        — main notebook with full analysis  
+├── `Forecast_Direction_OHLCV.pdf`          — PDF export  
+├── `requirements.txt`                      — project dependencies
+└── `README.md`                             — this documentation
+```
+---
+
+## 🚀 How to run
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/aspozd-DA-DS/DataAnalytics_projects.git
+   ```
+2. Go to the project folder:
+   ```bash
+   cd DataAnalytics_projects/04_Forecast_Direction_OHLCV
+   ```
+3. Run the notebook:
+   ```bash
+   jupyter notebook Forecast_Direction_OHLCV.ipynb
+   ```
+
+---
+   
+## 🏷 Topics
+`Data Analysis` `EDA` `Visualization` `Time Series` `Financial Data` `Python` `Binary Classification` `Machine Learning` `XGBoost LightGBM` `SHAP Feature Engineering` `Trading Quantitative Finance`
+
+<p align="right"><a href="#top">⬆ back to top</a></p>
